@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
   Scope,
@@ -11,9 +12,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PessoasService } from 'src/pessoas/pessoas.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ConfigType } from '@nestjs/config';
+import recadosConfig from './recados.config';
 import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
-import { EmailService } from 'src/email/email.service';
-import { ReponseRecadoDto } from './dto/response-recado.dto';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class RecadosService {
@@ -23,14 +24,17 @@ export class RecadosService {
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
     private readonly pessoasService: PessoasService,
-    private readonly emailService: EmailService,
-  ) {}
+    @Inject(recadosConfig.KEY)
+    private readonly recadosConfiguration: ConfigType<typeof recadosConfig>,
+  ) {
+    console.log(recadosConfiguration);
+  }
 
   throwNotFoundError() {
     throw new NotFoundException('Recado não encontrado');
   }
 
-  async findAll(paginationDto?: PaginationDto): Promise<ReponseRecadoDto[]> {
+  async findAll(paginationDto?: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const recados = await this.recadoRepository.find({
@@ -51,11 +55,10 @@ export class RecadosService {
         },
       },
     });
-
     return recados;
   }
 
-  async findOne(id: number): Promise<ReponseRecadoDto> {
+  async findOne(id: number) {
     // const recado = this.recados.find(item => item.id === id);
     const recado = await this.recadoRepository.findOne({
       where: {
@@ -85,7 +88,7 @@ export class RecadosService {
   async create(
     createRecadoDto: CreateRecadoDto,
     tokenPayload: TokenPayloadDto,
-  ): Promise<ReponseRecadoDto> {
+  ) {
     const { paraId } = createRecadoDto;
 
     // Encontrar a pessoa para quem o recado está sendo enviado
@@ -102,14 +105,8 @@ export class RecadosService {
       data: new Date(),
     };
 
-    const recado = this.recadoRepository.create(novoRecado);
+    const recado = await this.recadoRepository.create(novoRecado);
     await this.recadoRepository.save(recado);
-
-    // await this.emailService.sendEmail(
-    //   para.email,
-    //   `Você recebeu um recado de "${de.nome}" <${de.email}>`,
-    //   createRecadoDto.texto,
-    // );
 
     return {
       ...recado,
@@ -128,7 +125,7 @@ export class RecadosService {
     id: number,
     updateRecadoDto: UpdateRecadoDto,
     tokenPayload: TokenPayloadDto,
-  ): Promise<ReponseRecadoDto> {
+  ) {
     const recado = await this.findOne(id);
 
     if (recado.de.id !== tokenPayload.sub) {
@@ -142,18 +139,13 @@ export class RecadosService {
     return recado;
   }
 
-  async remove(
-    id: number,
-    tokenPayload: TokenPayloadDto,
-  ): Promise<ReponseRecadoDto> {
+  async remove(id: number, tokenPayload: TokenPayloadDto) {
     const recado = await this.findOne(id);
 
     if (recado.de.id !== tokenPayload.sub) {
       throw new ForbiddenException('Esse recado não é seu');
     }
 
-    await this.recadoRepository.delete(recado.id);
-
-    return recado;
+    return this.recadoRepository.remove(recado);
   }
 }

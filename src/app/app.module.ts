@@ -8,20 +8,9 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import globalConfig from 'src/global-config/global.config';
 import { GlobalConfigModule } from 'src/global-config/global-config.module';
 import { AuthModule } from 'src/auth/auth.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import * as path from 'path';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([
-      {
-        ttl: 10000, // time to live em ms
-        limit: 10, // máximo de requests durante o ttl
-        blockDuration: 5000, // tempo de bloqueio
-      },
-    ]),
     ConfigModule.forFeature(globalConfig),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule.forFeature(globalConfig)],
@@ -41,23 +30,13 @@ import { APP_GUARD } from '@nestjs/core';
         };
       },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: path.resolve(__dirname, '..', '..', 'pictures'),
-      serveRoot: '/pictures',
-    }),
     RecadosModule,
     PessoasModule,
     GlobalConfigModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
+  providers: [AppService],
   exports: [],
 })
 export class AppModule {}

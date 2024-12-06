@@ -39,13 +39,4 @@ export class Pessoa {
   // Esses recados são relacionados ao campo "para" na entidade recado
   @OneToMany(() => Recado, recado => recado.para)
   recadosRecebidos: Recado[];
-
-  @Column({ default: true })
-  active: boolean;
-
-  @Column({ default: '' })
-  picture: string;
-
-  // @Column({ type: 'simple-array', default: [] })
-  // routePolicies: RoutePolicies[];
 }

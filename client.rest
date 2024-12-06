@@ -1,4 +1,4 @@
-@baseUrl = http://127.0.0.1:3000
+@baseUrl = http://localhost:3000
 @authToken = {{authenticate.response.body.accessToken}}
 @refreshToken = {{authenticate.response.body.refreshToken}}
 
@@ -8,18 +8,18 @@ GET {{baseUrl}}/recados/
 ?limit=10
 &offset=0
 ### Lista apenas um recado
-GET {{baseUrl}}/recados/1/
+GET {{baseUrl}}/recados/30/
 ### Cria um recado
 POST {{baseUrl}}/recados/
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "texto": "Este texto deve chegar no e-mail. \nAqui vem na próxima linha.",
-    "paraId": 39
+    "texto": "De LUIZ para Joana",
+    "paraId": 12
 }
 ### Atualiza um recado
-PATCH {{baseUrl}}/recados/70/
+PATCH {{baseUrl}}/recados/38/
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
@@ -28,7 +28,7 @@ Content-Type: application/json
     "lido": true
 }
 ### Apaga um recado
-DELETE {{baseUrl}}/recados/70/
+DELETE {{baseUrl}}/recados/38/
 Authorization: Bearer {{authToken}}
 
 
@@ -50,12 +50,12 @@ POST {{baseUrl}}/pessoas/
 Content-Type: application/json
 
 {
-    "email": "luiz@email.com",
+    "email": "joao@email.com",
     "password": "123456",
-    "nome": "Luiz"
+    "nome": "João"
 }
 ### Atualiza uma pessoa
-PATCH {{baseUrl}}/pessoas/37/
+PATCH {{baseUrl}}/pessoas/29/
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
@@ -63,7 +63,7 @@ Content-Type: application/json
     "nome": "JOÃO"
 }
 ### Apaga uma pessoa
-DELETE {{baseUrl}}/pessoas/37/
+DELETE {{baseUrl}}/pessoas/29/
 Authorization: Bearer {{authToken}}
 
 
@@ -90,24 +90,3 @@ Content-Type: application/json
 {
     "refreshToken": "{{refreshToken}}"
 }
-
-
-
-# 
-
-
-
-# Upload
-### Foto da pessoa
-POST {{baseUrl}}/pessoas/upload-picture/
-Authorization: Bearer {{authToken}}
-Content-Type: multipart/form-data; boundary=----BoundaryDelimitadorHttp
-
-------BoundaryDelimitadorHttp
-Content-Disposition: form-data; name="file"; filename="man.png"
-Content-Type: image/png
-
-< ./dev/images/man.png
-------BoundaryDelimitadorHttp--
-### Ver foto
-GET {{baseUrl}}/pictures/39.jpg

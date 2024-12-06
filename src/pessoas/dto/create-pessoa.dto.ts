@@ -20,7 +20,4 @@ export class CreatePessoaDto {
   @MinLength(3)
   @MaxLength(100)
   nome: string;
-
-  // @IsEnum(RoutePolicies, { each: true })
-  // routePolicies: RoutePolicies[];
 }
